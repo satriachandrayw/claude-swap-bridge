@@ -1,0 +1,59 @@
+name: claude-swap-bridge
+version: 1.0.0
+manifest_version: 2
+description: >-
+  Bridge claude-swap into Hermes — rotate the Claude account on a rate limit while
+  running the Claude Subscription DirectSDK provider, read per-account plan limits,
+  and manage stored Claude Code logins.
+author: satria
+license: MIT
+homepage: https://github.com/realiti4/claude-swap
+tags: [claude, claude-code, rate-limit, accounts, model-provider]
+requires_hermes: ">=0.21.4"
+provides_tools:
+  - claude_swap_accounts
+  - claude_swap_switch
+  - claude_swap_auto
+  - claude_swap_manage
+provides_hooks:
+  - api_request_error
+external_dependencies:
+  - name: cswap
+    check: "cswap --version"
+    install: "uv tool install claude-swap"
+config_schema:
+  provider:
+    type: str
+    default: claude-subscription-directsdk-experimental
+    label: Provider to react to
+    description: Rate limits from this Hermes provider trigger an account switch.
+  switch_on_rate_limit:
+    type: bool
+    default: true
+    label: Switch account on rate limit
+    description: >-
+      When a request fails with a configured status from the provider above, rotate the
+      active Claude Code login with claude-swap before Hermes retries.
+  statuses:
+    type: list
+    default: [429]
+    label: HTTP statuses that trigger a switch
+    description: 429 is the DirectSDK plugin's "plan or session limit".
+  cooldown_seconds:
+    type: int
+    default: 120
+    label: Minimum seconds between reactive switches
+  max_switches_per_turn:
+    type: int
+    default: 1
+    label: Max reactive switches per agent turn
+  cswap_command:
+    type: str
+    default: ""
+    label: cswap executable
+    description: Leave empty to resolve `cswap` on PATH.
+  timeout_seconds:
+    type: float
+    default: 25.0
+    label: cswap subprocess timeout (seconds)
+    description: Must stay under Hermes' 30s bounded-hook budget.

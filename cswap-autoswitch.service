@@ -1,0 +1,21 @@
+[Unit]
+Description=claude-swap auto-switcher for Claude Code accounts
+Documentation=https://github.com/realiti4/claude-swap
+After=network-online.target
+
+[Service]
+Type=simple
+# Proactive rotation: switch off the active account when its 5h/7d window reaches the
+# autoswitch threshold (default 90%). Hermes' next Claude request spawns a fresh
+# `claude`, which picks up the swapped credential. Tune with:
+#   cswap config set autoswitch.threshold 80
+ExecStart=%h/.local/bin/cswap auto --json
+Restart=on-failure
+RestartSec=30
+Nice=10
+StandardOutput=journal
+StandardError=journal
+# The JSONL decision log: journalctl --user -u cswap-autoswitch -f
+
+[Install]
+WantedBy=default.target
